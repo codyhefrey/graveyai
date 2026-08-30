@@ -27,14 +27,17 @@ class VoiceResponse(BaseModel):
 
 
 class RAGDocumentRequest(BaseModel):
-    text: str = Field(min_length=1, max_length=20000)
-    source: str = Field(default="api", min_length=1, max_length=500)
+    document_id: str = Field(min_length=1, max_length=200)
+    text: str = Field(min_length=1, max_length=100000)
 
 
 class RAGDocumentResponse(BaseModel):
-    id: str
-    text: str
-    source: str
+    document_id: str
+    chunks: int
+    content_hash: str
+    hash_algorithm: str
+    chain: str
+    quantum_ready: bool
 
 
 class RAGSearchRequest(BaseModel):
@@ -43,10 +46,11 @@ class RAGSearchRequest(BaseModel):
 
 
 class RAGResult(BaseModel):
-    id: str
+    document_id: str
+    chunk_id: str
     text: str
     score: float
-    source: str
+    content_hash: str
 
 
 class RAGSearchResponse(BaseModel):
