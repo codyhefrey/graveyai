@@ -6,11 +6,11 @@
 
 GraveyAI aims to make useful AI accessible through a single platform that can understand questions, retrieve trusted knowledge, work with documents, and eventually communicate through text and voice.
 
-## Phase 1 — Foundation
+## Current milestone
 
-This repository establishes the initial architecture for a production-oriented GraveyAI system.
+**Phase 2 — Backend foundation** is now implemented. The API has a versioned `/api/v1` surface, typed request/response schemas, environment-driven configuration, an AI-provider abstraction, and a deterministic mock provider for development and testing.
 
-### Planned capabilities
+## Planned capabilities
 
 - AI conversational assistant
 - Retrieval-Augmented Generation (RAG)
@@ -69,8 +69,9 @@ graveyai/
 ├── .github/workflows/
 ├── backend/
 │   ├── app/
-│   │   ├── api/
+│   │   ├── api/v1/
 │   │   ├── ai/
+│   │   ├── core/
 │   │   ├── rag/
 │   │   ├── models/
 │   │   └── services/
@@ -86,11 +87,33 @@ graveyai/
 └── README.md
 ```
 
+## API
+
+### Health
+
+`GET /health`
+
+Returns service status and API version.
+
+### Chat
+
+`POST /api/v1/chat`
+
+Example request:
+
+```json
+{
+  "message": "Hello GraveyAI"
+}
+```
+
+During development, the endpoint uses the `mock` provider. Real model integrations will be added behind the same provider interface so application code remains provider-agnostic.
+
 ## Roadmap
 
 - [x] Phase 1: Project foundation
-- [ ] Phase 2: FastAPI backend and health API
-- [ ] Phase 3: AI chat service
+- [x] Phase 2: FastAPI backend foundation
+- [ ] Phase 3: Production AI chat provider
 - [ ] Phase 4: RAG and document intelligence
 - [ ] Phase 5: Web interface
 - [ ] Phase 6: Authentication and user management
@@ -109,6 +132,6 @@ graveyai/
 
 ## Status
 
-**Early development — Phase 1.**
+**Early development — Phase 2.**
 
 GraveyAI is an evolving open-source project. APIs, architecture, and implementation details may change as the system matures.
