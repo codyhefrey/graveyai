@@ -11,6 +11,21 @@ class ChatResponse(BaseModel):
     model: str
 
 
+class VoiceTranscriptionResponse(BaseModel):
+    text: str
+    language: str
+    provider: str
+
+
+class VoiceResponse(BaseModel):
+    text: str
+    language: str
+    stt_provider: str
+    ai_provider: str
+    ai_model: str
+    tts_provider: str
+
+
 class HealthResponse(BaseModel):
     status: str
     service: str
