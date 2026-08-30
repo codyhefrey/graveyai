@@ -8,14 +8,14 @@ GraveyAI aims to make useful AI accessible through a single platform that can un
 
 ## Current milestone
 
-**Phase 3 — Production AI provider** is now implemented. GraveyAI keeps a provider-agnostic AI interface while adding an OpenAI adapter based on the Responses API. The deterministic mock provider remains the default for tests and local development.
+**Phase 8 — Provenance-aware RAG foundation** is now implemented. GraveyAI can ingest documents through the existing RAG pipeline, preserve SHA3-256 provenance metadata associated with GraveyChain, and expose authenticated retrieval endpoints. The development retriever is intentionally dependency-free so it can later be replaced by PostgreSQL/pgvector without changing the API contract.
 
-### AI provider modes
+### Phase 8 endpoints
 
-- `mock` — deterministic local provider; safe for tests and development.
-- `openai` — production provider using `OPENAI_API_KEY` and the configured model.
+- `POST /api/v1/rag/documents` — authenticated document ingestion.
+- `POST /api/v1/rag/search` — authenticated knowledge retrieval.
 
-OpenAI's current model catalog supports the Responses API and client SDKs; GraveyAI keeps the model name configurable so the deployment can evolve without changing application code.
+RAG provenance records retain the document hash, SHA3-256 algorithm, GraveyChain association, and quantum-ready metadata.
 
 ## Planned capabilities
 
@@ -46,16 +46,17 @@ OpenAI's current model catalog supports the Responses API and client SDKs; Grave
                    └─────────────┼───────────────┘
                                  ▼
                          ┌───────────────┐
-                         │   AI Engine   │
-                         │ Provider API  │
+                         │   RAG Layer   │
+                         │ Retrieval +   │
+                         │ Provenance    │
                          └───────┬───────┘
                                  │
-                    ┌────────────┼────────────┐
-                    ▼            ▼            ▼
-              ┌──────────┐ ┌──────────┐ ┌────────────┐
-              │ OpenAI   │ │  Mock    │ │ Future AI  │
-              │ Provider │ │ Provider │ │ Providers  │
-              └──────────┘ └──────────┘ └────────────┘
+                         ┌───────▼───────┐
+                         │   AI Engine   │
+                         │ Provider API  │
+                         └───────────────┘
+
+             Document → Chunk → SHA3-256 → GraveyChain
 ```
 
 ## Technology direction
@@ -78,67 +79,12 @@ graveyai/
 │   ├── app/
 │   │   ├── api/v1/
 │   │   ├── ai/
+│   │   ├── auth/
 │   │   ├── core/
 │   │   ├── rag/
-│   │   ├── models/
-│   │   └── services/
+│   │   └── voice/
 │   └── tests/
-├── frontend/
 ├── docs/
-├── infrastructure/
-├── .env.example
-├── .gitignore
-├── docker-compose.yml
-├── CONTRIBUTING.md
-├── LICENSE
-└── README.md
+├── frontend/
+└── docker-compose.yml
 ```
-
-## API
-
-### Health
-
-`GET /health`
-
-Returns service status and API version.
-
-### Chat
-
-`POST /api/v1/chat`
-
-Example request:
-
-```json
-{
-  "message": "Explain artificial intelligence in simple terms."
-}
-```
-
-The endpoint uses the configured provider. `mock` is the default. To enable the OpenAI provider, configure `AI_PROVIDER=openai` and `OPENAI_API_KEY` in the runtime environment. Never commit API keys to GitHub.
-
-## Roadmap
-
-- [x] Phase 1: Project foundation
-- [x] Phase 2: FastAPI backend foundation
-- [x] Phase 3: Production AI chat provider
-- [ ] Phase 4: RAG and document intelligence
-- [ ] Phase 5: Web interface
-- [ ] Phase 6: Authentication and user management
-- [ ] Phase 7: Voice interface
-- [ ] Phase 8: Evaluation, testing, and security hardening
-- [ ] Phase 9: Cloud deployment
-- [ ] Phase 10: Production readiness
-
-## Development principles
-
-1. Privacy and security by design.
-2. Clear separation between application logic and AI providers.
-3. Ground answers in retrieved evidence whenever possible.
-4. Test critical behavior before adding complexity.
-5. Keep the project modular so components can evolve independently.
-
-## Status
-
-**Early development — Phase 3.**
-
-GraveyAI is an evolving open-source project. APIs, architecture, and implementation details may change as the system matures.
