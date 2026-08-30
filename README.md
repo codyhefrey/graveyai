@@ -1,63 +1,134 @@
 # GraveyAI
 
-> An AI-powered knowledge and assistance platform built for trustworthy retrieval, multilingual interaction, voice capabilities, and practical everyday assistance.
+> **A provider-agnostic, provenance-aware AI system engineered from first principles for trustworthy intelligence, multilingual interaction, voice, knowledge retrieval, and future autonomous capabilities.**
 
-## Vision
+## The engineering vision
 
-GraveyAI aims to make useful AI accessible through a single platform that can understand questions, retrieve trusted knowledge, work with documents, and eventually communicate through text and voice.
+GraveyAI is not a collection of disconnected features. It is one evolving system with explicit architectural boundaries: identity, security, intelligence, knowledge, multimodal interaction, provenance, infrastructure, and eventually autonomous agents.
+
+The guiding principle is simple: **design the contracts first, isolate dependencies, make failure explicit, preserve provenance, and evolve infrastructure without rewriting the intelligence layer.**
+
+Individual phases are milestones in one engineering journey—not separate products.
+
+## Architecture at a glance
+
+```text
+                         ┌────────────────────────┐
+                         │        CLIENTS         │
+                         │ Web • Mobile • Voice   │
+                         └────────────┬───────────┘
+                                      │
+                                      ▼
+                         ┌────────────────────────┐
+                         │   SECURITY BOUNDARY    │
+                         │ Identity • Auth • API  │
+                         └────────────┬───────────┘
+                                      │
+                   ┌──────────────────┼──────────────────┐
+                   ▼                  ▼                  ▼
+              ┌─────────┐        ┌─────────┐        ┌──────────┐
+              │  CHAT   │        │  VOICE  │        │DOCUMENTS │
+              └────┬────┘        └────┬────┘        └────┬─────┘
+                   └──────────────────┼──────────────────┘
+                                      ▼
+                         ┌────────────────────────┐
+                         │    INTELLIGENCE CORE   │
+                         │ AI • Orchestration     │
+                         │ Tools • Memory         │
+                         └────────────┬───────────┘
+                                      │
+                           ┌──────────┴──────────┐
+                           ▼                     ▼
+                    ┌────────────┐       ┌────────────┐
+                    │    RAG     │       │ AI MODELS  │
+                    │ Knowledge  │       │ Providers  │
+                    └─────┬──────┘       └────────────┘
+                          │
+                          ▼
+                    ┌────────────┐
+                    │ PROVENANCE │
+                    │   + TRUST  │
+                    └─────┬──────┘
+                          ▼
+                    ┌────────────┐
+                    │GraveyChain │
+                    └────────────┘
+```
+
+## Architectural laws
+
+### 1. Contracts before vendors
+Core interfaces define capabilities. Vendor SDKs live behind adapters. Changing an AI, STT, TTS, database, or retrieval provider should not require rewriting the application.
+
+### 2. Security at the boundary
+Identity is established before protected application operations. Application logic consumes authenticated identity rather than owning credential storage.
+
+### 3. Deterministic development
+Mock providers remain first-class development dependencies so tests remain reproducible and do not require external services.
+
+### 4. Knowledge must be traceable
+Retrieved knowledge carries content identity and provenance metadata. Trust is designed into the data path rather than added after the fact.
+
+### 5. Infrastructure must remain replaceable
+Development services can evolve into PostgreSQL, pgvector, object storage, distributed queues, and production infrastructure while preserving stable application contracts.
+
+### 6. Secrets never belong in source control
+Credentials are configuration concerns. The repository contains interfaces and configuration rules—not production secrets.
+
+### 7. Failure is part of the architecture
+External services can fail, time out, reject requests, or become unavailable. Each boundary should have explicit validation, bounded failures, and useful diagnostics.
+
+### 8. Observability is engineering, not decoration
+Production evolution requires structured logs, metrics, traces, health checks, audit events, and evaluation signals.
+
+### 9. Least privilege everywhere
+Identity, documents, tools, memory, and future agent actions must have explicit authorization boundaries.
+
+### 10. Evolution without rewrites
+New capabilities should compose with the existing system. The goal is controlled architectural growth—not accumulating technical debt until the platform must be rebuilt.
+
+## Engineering journey
+
+```text
+FOUNDATION
+Architecture → Configuration → APIs → Testing
+        ↓
+SECURITY
+Authentication → Identity → Authorization
+        ↓
+INTELLIGENCE
+AI Provider → Reasoning → Orchestration
+        ↓
+KNOWLEDGE
+RAG → Ingestion → Retrieval → Provenance
+        ↓
+MULTIMODAL
+Text → Speech → Voice → Documents → Vision
+        ↓
+PERSISTENCE
+PostgreSQL → Vector Search → Memory → User Data
+        ↓
+AGENCY
+Tools → Workflows → Planning → Controlled Agents
+        ↓
+TRUST
+Evaluation → Safety → Auditing → GraveyChain
+        ↓
+SCALE
+Docker → CI/CD → Observability → Distributed Infrastructure
+        ↓
+ADVANCED SYSTEMS
+Multilingual Intelligence → Quantum-ready Security → Global Platform
+```
 
 ## Current milestone
 
-**Phase 8 — Provenance-aware RAG foundation** is now implemented. GraveyAI can ingest documents through the existing RAG pipeline, preserve SHA3-256 provenance metadata associated with GraveyChain, and expose authenticated retrieval endpoints. The development retriever is intentionally dependency-free so it can later be replaced by PostgreSQL/pgvector without changing the API contract.
+**Phase 8 — Provenance-aware RAG foundation.** GraveyAI can ingest documents through the RAG pipeline, preserve SHA3-256 provenance metadata associated with GraveyChain, and expose authenticated retrieval endpoints. The current retriever is intentionally dependency-light so production semantic retrieval can be introduced without changing the public API contract.
 
 ### Phase 8 endpoints
 
 - `POST /api/v1/rag/documents` — authenticated document ingestion.
 - `POST /api/v1/rag/search` — authenticated knowledge retrieval.
-
-RAG provenance records retain the document hash, SHA3-256 algorithm, GraveyChain association, and quantum-ready metadata.
-
-## Planned capabilities
-
-- AI conversational assistant
-- Retrieval-Augmented Generation (RAG)
-- Document ingestion and knowledge retrieval
-- Multilingual interaction
-- Voice input and output
-- Authentication and user accounts
-- Conversation history and memory
-- AI safety and evaluation tooling
-- Docker-based local development
-- Automated testing and CI/CD
-
-## Architecture
-
-```text
-                         ┌──────────────────┐
-                         │     GraveyAI     │
-                         │   AI Assistant   │
-                         └────────┬─────────┘
-                                  │
-                    ┌─────────────┼─────────────┐
-                    ▼             ▼             ▼
-              ┌──────────┐  ┌──────────┐  ┌───────────┐
-              │   Chat   │  │   Voice  │  │ Documents │
-              └────┬─────┘  └────┬─────┘  └─────┬─────┘
-                   └─────────────┼───────────────┘
-                                 ▼
-                         ┌───────────────┐
-                         │   RAG Layer   │
-                         │ Retrieval +   │
-                         │ Provenance    │
-                         └───────┬───────┘
-                                 │
-                         ┌───────▼───────┐
-                         │   AI Engine   │
-                         │ Provider API  │
-                         └───────────────┘
-
-             Document → Chunk → SHA3-256 → GraveyChain
-```
 
 ## Technology direction
 
@@ -65,7 +136,8 @@ RAG provenance records retain the document hash, SHA3-256 algorithm, GraveyChain
 - **Backend:** Python + FastAPI
 - **Database:** PostgreSQL
 - **Vector search:** pgvector
-- **AI:** provider-agnostic interface + OpenAI Responses API adapter
+- **AI:** provider-agnostic interface + model adapters
+- **Voice:** provider-agnostic STT/TTS interfaces
 - **Infrastructure:** Docker
 - **Testing:** Pytest + API tests
 - **CI:** GitHub Actions
@@ -74,17 +146,23 @@ RAG provenance records retain the document hash, SHA3-256 algorithm, GraveyChain
 
 ```text
 graveyai/
-├── .github/workflows/
+├── .github/workflows/       # CI/CD automation
 ├── backend/
 │   ├── app/
-│   │   ├── api/v1/
-│   │   ├── ai/
-│   │   ├── auth/
-│   │   ├── core/
-│   │   ├── rag/
-│   │   └── voice/
-│   └── tests/
-├── docs/
-├── frontend/
-└── docker-compose.yml
+│   │   ├── api/v1/          # Stable API boundary
+│   │   ├── ai/              # AI provider abstraction/adapters
+│   │   ├── auth/            # Identity/authentication boundary
+│   │   ├── core/            # Configuration and application primitives
+│   │   ├── rag/             # Knowledge ingestion/retrieval/provenance
+│   │   └── voice/           # STT/TTS abstraction and orchestration
+│   └── tests/               # Automated verification
+├── docs/                    # Architecture and engineering decisions
+├── frontend/                # Client applications
+└── docker-compose.yml       # Local infrastructure
 ```
+
+## Definition of done
+
+A GraveyAI capability is not considered complete merely because its happy path works. A mature capability should have a clear contract, validation, authentication/authorization where required, deterministic tests, failure handling, configuration boundaries, observability hooks, and a migration path from development to production infrastructure.
+
+**GraveyAI is being built as a system first and a feature set second.**
