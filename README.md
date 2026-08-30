@@ -8,7 +8,14 @@ GraveyAI aims to make useful AI accessible through a single platform that can un
 
 ## Current milestone
 
-**Phase 2 — Backend foundation** is now implemented. The API has a versioned `/api/v1` surface, typed request/response schemas, environment-driven configuration, an AI-provider abstraction, and a deterministic mock provider for development and testing.
+**Phase 3 — Production AI provider** is now implemented. GraveyAI keeps a provider-agnostic AI interface while adding an OpenAI adapter based on the Responses API. The deterministic mock provider remains the default for tests and local development.
+
+### AI provider modes
+
+- `mock` — deterministic local provider; safe for tests and development.
+- `openai` — production provider using `OPENAI_API_KEY` and the configured model.
+
+OpenAI's current model catalog supports the Responses API and client SDKs; GraveyAI keeps the model name configurable so the deployment can evolve without changing application code.
 
 ## Planned capabilities
 
@@ -40,14 +47,14 @@ GraveyAI aims to make useful AI accessible through a single platform that can un
                                  ▼
                          ┌───────────────┐
                          │   AI Engine   │
-                         │    LLM + RAG  │
+                         │ Provider API  │
                          └───────┬───────┘
                                  │
                     ┌────────────┼────────────┐
                     ▼            ▼            ▼
               ┌──────────┐ ┌──────────┐ ┌────────────┐
-              │PostgreSQL│ │ pgvector │ │ Knowledge  │
-              │ Database │ │ Embeddings│ │    Base    │
+              │ OpenAI   │ │  Mock    │ │ Future AI  │
+              │ Provider │ │ Provider │ │ Providers  │
               └──────────┘ └──────────┘ └────────────┘
 ```
 
@@ -57,7 +64,7 @@ GraveyAI aims to make useful AI accessible through a single platform that can un
 - **Backend:** Python + FastAPI
 - **Database:** PostgreSQL
 - **Vector search:** pgvector
-- **AI orchestration:** modular AI/RAG services
+- **AI:** provider-agnostic interface + OpenAI Responses API adapter
 - **Infrastructure:** Docker
 - **Testing:** Pytest + API tests
 - **CI:** GitHub Actions
@@ -103,17 +110,17 @@ Example request:
 
 ```json
 {
-  "message": "Hello GraveyAI"
+  "message": "Explain artificial intelligence in simple terms."
 }
 ```
 
-During development, the endpoint uses the `mock` provider. Real model integrations will be added behind the same provider interface so application code remains provider-agnostic.
+The endpoint uses the configured provider. `mock` is the default. To enable the OpenAI provider, configure `AI_PROVIDER=openai` and `OPENAI_API_KEY` in the runtime environment. Never commit API keys to GitHub.
 
 ## Roadmap
 
 - [x] Phase 1: Project foundation
 - [x] Phase 2: FastAPI backend foundation
-- [ ] Phase 3: Production AI chat provider
+- [x] Phase 3: Production AI chat provider
 - [ ] Phase 4: RAG and document intelligence
 - [ ] Phase 5: Web interface
 - [ ] Phase 6: Authentication and user management
@@ -132,6 +139,6 @@ During development, the endpoint uses the `mock` provider. Real model integratio
 
 ## Status
 
-**Early development — Phase 2.**
+**Early development — Phase 3.**
 
 GraveyAI is an evolving open-source project. APIs, architecture, and implementation details may change as the system matures.
