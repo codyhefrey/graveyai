@@ -5,20 +5,19 @@ from app.ai.mock import MockAIProvider
 from app.ai.openai_provider import OpenAIProvider
 from app.api.v1.auth import router as auth_router
 from app.api.v1.schemas import (
-    ChatRequest, ChatResponse, HealthResponse, RAGDocumentRequest,
-    RAGDocumentResponse, RAGResult, RAGSearchRequest, RAGSearchResponse,
-    VoiceResponse, VoiceTranscriptionResponse,
+    ChatRequest, ChatResponse, RAGDocumentRequest, RAGDocumentResponse,
+    RAGResult, RAGSearchRequest, RAGSearchResponse, VoiceResponse,
+    VoiceTranscriptionResponse,
 )
 from app.auth.dependencies import require_bearer_token
 from app.core.config import Settings, get_settings
-from app.rag.base import RAGProvider
-from app.rag.memory import InMemoryRAGProvider
+from app.rag.service import RAGService
 from app.voice.base import STTProvider, TTSProvider
 from app.voice.mock import MockSTTProvider, MockTTSProvider
 
 router = APIRouter()
 router.include_router(auth_router)
-_rag = InMemoryRAGProvider()
+_rag = RAGService()
 
 
 def get_ai_provider(settings: Settings = Depends(get_settings)) -> AIProvider:
@@ -43,10 +42,6 @@ def get_tts_provider(settings: Settings = Depends(get_settings)) -> TTSProvider:
     raise HTTPException(status_code=500, detail=f"Unsupported TTS provider: {settings.voice_tts_provider}")
 
 
-def get_rag_provider() -> RAGProvider:
-    return _rag
-
-
 @router.post("/chat", response_model=ChatResponse, tags=["chat"])
 async def chat(request: ChatRequest, provider: AIProvider = Depends(get_ai_provider), settings: Settings = Depends(get_settings)) -> ChatResponse:
     response = await provider.generate(request.message)
@@ -54,15 +49,28 @@ async def chat(request: ChatRequest, provider: AIProvider = Depends(get_ai_provi
 
 
 @router.post("/rag/documents", response_model=RAGDocumentResponse, tags=["rag"])
-async def add_rag_document(request: RAGDocumentRequest, _: str = Depends(require_bearer_token), rag: RAGProvider = Depends(get_rag_provider)) -> RAGDocumentResponse:
-    document = await rag.add(request.text, request.source)
-    return RAGDocumentResponse(id=document.id, text=document.text, source=document.source)
+async def add_rag_document(request: RAGDocumentRequest, _: str = Depends(require_bearer_token)) -> RAGDocumentResponse:
+    chunks, provenance = _rag.ingest(request.document_id, request.text)
+    return RAGDocumentResponse(
+        document_id=request.document_id,
+        chunks=len(chunks),
+        content_hash=provenance.content_hash,
+        hash_algorithm=provenance.hash_algorithm,
+        chain=provenance.chain,
+        quantum_ready=provenance.quantum_ready,
+    )
 
 
 @router.post("/rag/search", response_model=RAGSearchResponse, tags=["rag"])
-async def search_rag(request: RAGSearchRequest, _: str = Depends(require_bearer_token), rag: RAGProvider = Depends(get_rag_provider)) -> RAGSearchResponse:
-    results = await rag.retrieve(request.query, request.top_k)
-    return RAGSearchResponse(results=[RAGResult(id=r.id, text=r.text, score=r.score, source=r.source) for r in results])
+async def search_rag(request: RAGSearchRequest, _: str = Depends(require_bearer_token)) -> RAGSearchResponse:
+    results = _rag.search(request.query, request.top_k)
+    return RAGSearchResponse(results=[RAGResult(
+        document_id=r.chunk.document_id,
+        chunk_id=r.chunk.chunk_id,
+        text=r.chunk.text,
+        score=r.score,
+        content_hash=r.chunk.content_hash,
+    ) for r in results])
 
 
 @router.post("/voice/transcribe", response_model=VoiceTranscriptionResponse, tags=["voice"])
