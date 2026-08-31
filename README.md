@@ -1,14 +1,27 @@
 # GraveyAI
 
-> **A provider-agnostic, provenance-aware AI system engineered from first principles for trustworthy intelligence, multilingual interaction, voice, knowledge retrieval, and future autonomous capabilities.**
+> **A provider-agnostic, provenance-aware AI platform engineered for research, analysis, decision support, learning, knowledge discovery, and multimodal human interaction.**
 
-## The engineering vision
+**From Africa. By Africa. For the World. For Everyone.**
 
-GraveyAI is not a collection of disconnected features. It is one evolving system with explicit architectural boundaries: identity, security, intelligence, knowledge, multimodal interaction, provenance, infrastructure, and eventually autonomous agents.
+## Project position
 
-The guiding principle is simple: **design the contracts first, isolate dependencies, make failure explicit, preserve provenance, and evolve infrastructure without rewriting the intelligence layer.**
+GraveyAI is not a collection of disconnected features and not merely an LLM wrapper. It is an evolving AI platform designed around explicit architectural boundaries for identity, security, intelligence, knowledge, multimodal interaction, provenance, resilience, and future controlled autonomy.
 
-Individual phases are milestones in one engineering journey—not separate products.
+The engineering objective is to build a system that researchers, professionals, organizations, students, and everyday users can use to understand information, analyze evidence, conduct research, explore ideas, and make better-informed decisions.
+
+## Engineering principles
+
+- **Contracts before vendors** — core interfaces isolate external providers.
+- **Security at the boundary** — authenticated identity precedes protected operations.
+- **Evidence before assertion** — research-oriented outputs should distinguish evidence, inference, assumptions, and uncertainty.
+- **Provenance by design** — important knowledge objects retain source and integrity metadata.
+- **Decentralized by design; resilient by architecture** — avoid unnecessary single points of failure without forcing every subsystem onto a blockchain.
+- **Least privilege** — users, services, documents, tools, memory, and agents receive only required authority.
+- **Failure is part of the architecture** — outages, timeouts, partitions, provider failures, and compromised nodes are design cases.
+- **Deterministic development** — mocks and local implementations keep tests reproducible.
+- **Infrastructure remains replaceable** — model, voice, retrieval, storage, and cloud providers remain adapter boundaries.
+- **Measured claims only** — implemented, tested, validated, production-ready, planned, and research capabilities are explicitly distinguished.
 
 ## Architecture at a glance
 
@@ -16,6 +29,7 @@ Individual phases are milestones in one engineering journey—not separate produ
                          ┌────────────────────────┐
                          │        CLIENTS         │
                          │ Web • Mobile • Voice   │
+                         │ Research • Data • API  │
                          └────────────┬───────────┘
                                       │
                                       ▼
@@ -24,68 +38,147 @@ Individual phases are milestones in one engineering journey—not separate produ
                          │ Identity • Auth • API  │
                          └────────────┬───────────┘
                                       │
-                   ┌──────────────────┼──────────────────┐
-                   ▼                  ▼                  ▼
-              ┌─────────┐        ┌─────────┐        ┌──────────┐
-              │  CHAT   │        │  VOICE  │        │DOCUMENTS │
-              └────┬────┘        └────┬────┘        └────┬─────┘
-                   └──────────────────┼──────────────────┘
+                    ┌─────────────────┼─────────────────┐
+                    ▼                 ▼                 ▼
+                 Research          Voice             Documents
+                    │                 │                 │
+                    └─────────────────┼─────────────────┘
                                       ▼
                          ┌────────────────────────┐
                          │    INTELLIGENCE CORE   │
-                         │ AI • Orchestration     │
-                         │ Tools • Memory         │
+                         │ Models • Reasoning     │
+                         │ Orchestration • Tools  │
                          └────────────┬───────────┘
                                       │
-                           ┌──────────┴──────────┐
-                           ▼                     ▼
-                    ┌────────────┐       ┌────────────┐
-                    │    RAG     │       │ AI MODELS  │
-                    │ Knowledge  │       │ Providers  │
-                    └─────┬──────┘       └────────────┘
-                          │
-                          ▼
-                    ┌────────────┐
-                    │ PROVENANCE │
-                    │   + TRUST  │
-                    └─────┬──────┘
-                          ▼
-                    ┌────────────┐
-                    │GraveyChain │
-                    └────────────┘
+                    ┌─────────────────┼─────────────────┐
+                    ▼                 ▼                 ▼
+                  RAG              Memory            Analysis
+                    │                 │                 │
+                    └─────────────────┼─────────────────┘
+                                      ▼
+                         ┌────────────────────────┐
+                         │   TRUST + PROVENANCE   │
+                         │ Evidence • Integrity   │
+                         │ Audit • GraveyChain    │
+                         └────────────┬───────────┘
+                                      │
+                                      ▼
+                         ┌────────────────────────┐
+                         │ DISTRIBUTED FOUNDATION │
+                         │ Nodes • Discovery      │
+                         │ Replication • Recovery │
+                         └────────────────────────┘
 ```
 
-## Architectural laws
+## Research and decision-support model
 
-### 1. Contracts before vendors
-Core interfaces define capabilities. Vendor SDKs live behind adapters. Changing an AI, STT, TTS, database, or retrieval provider should not require rewriting the application.
+GraveyAI is intended to support serious analytical workflows rather than simply generate fluent answers.
 
-### 2. Security at the boundary
-Identity is established before protected application operations. Application logic consumes authenticated identity rather than owning credential storage.
+```text
+Question / Problem
+       ↓
+Acquire Evidence
+       ↓
+Validate Inputs
+       ↓
+Retrieve Relevant Knowledge
+       ↓
+Analyze / Reason
+       ↓
+Identify Assumptions
+       ↓
+Quantify or Explain Uncertainty
+       ↓
+Produce Findings
+       ↓
+Expose Sources / Provenance
+       ↓
+Human Review and Decision
+```
 
-### 3. Deterministic development
-Mock providers remain first-class development dependencies so tests remain reproducible and do not require external services.
+The system should help users make better decisions without presenting itself as an unquestionable authority.
 
-### 4. Knowledge must be traceable
-Retrieved knowledge carries content identity and provenance metadata. Trust is designed into the data path rather than added after the fact.
+## Release strategy
 
-### 5. Infrastructure must remain replaceable
-Development services can evolve into PostgreSQL, pgvector, object storage, distributed queues, and production infrastructure while preserving stable application contracts.
+Development phases are engineering milestones. **Releases are validated, versioned product states.** A phase may span multiple releases, and a release may consolidate work from multiple phases.
 
-### 6. Secrets never belong in source control
-Credentials are configuration concerns. The repository contains interfaces and configuration rules—not production secrets.
+### Release families
 
-### 7. Failure is part of the architecture
-External services can fail, time out, reject requests, or become unavailable. Each boundary should have explicit validation, bounded failures, and useful diagnostics.
+| Release | Working designation | Primary objective |
+|---|---|---|
+| **v0.1.x** | Genesis | Initial architecture and foundational services |
+| **v0.2.x** | Foundation | APIs, configuration, security and testing foundations |
+| **v0.3.x** | Intelligence | Model/provider abstraction and reasoning infrastructure |
+| **v0.4.x** | Knowledge | RAG, ingestion, retrieval and provenance |
+| **v0.5.x** | Voice | Multimodal speech interfaces and provider abstraction |
+| **v0.6.x** | Federation | Distributed identity, trust and service discovery |
+| **v0.7.x** | Memory | Persistent knowledge, vector search and contextual memory |
+| **v0.8.x** | Agents | Tools, workflows and controlled agent orchestration |
+| **v0.9.x** | Research | Research workflows, evaluation and reproducibility |
+| **v1.0.x** | Initial Stable | Production-grade initial platform |
+| **v2.x+** | Evolution | Distributed intelligence and advanced capabilities |
 
-### 8. Observability is engineering, not decoration
-Production evolution requires structured logs, metrics, traces, health checks, audit events, and evaluation signals.
+These designations are roadmap targets unless a corresponding release is published and documented.
 
-### 9. Least privilege everywhere
-Identity, documents, tools, memory, and future agent actions must have explicit authorization boundaries.
+### Release channels
 
-### 10. Evolution without rewrites
-New capabilities should compose with the existing system. The goal is controlled architectural growth—not accumulating technical debt until the platform must be rebuilt.
+- **Experimental** — research and architectural experiments.
+- **Alpha** — incomplete capabilities suitable for controlled development use.
+- **Beta** — integrated capabilities undergoing broader validation.
+- **Stable** — documented, tested, supported capability set.
+
+### Semantic versioning
+
+GraveyAI follows the intent of semantic versioning:
+
+```text
+MAJOR.MINOR.PATCH
+  │     │     └── Compatible fixes
+  │     └──────── Backward-compatible capabilities
+  └────────────── Breaking API or architectural changes
+```
+
+### Release gates
+
+A release should not be declared mature merely because the happy path works. Release readiness should consider:
+
+- automated tests;
+- API compatibility;
+- security checks;
+- dependency review;
+- configuration and secret hygiene;
+- failure-path testing;
+- documentation;
+- observability;
+- reproducibility;
+- performance characteristics where applicable;
+- known limitations and rollback/recovery procedures.
+
+## Engineering lifecycle
+
+```text
+IDEA
+ ↓
+ARCHITECTURE
+ ↓
+INTERFACE / CONTRACT
+ ↓
+IMPLEMENTATION
+ ↓
+UNIT + INTEGRATION TESTS
+ ↓
+SECURITY / FAILURE REVIEW
+ ↓
+VALIDATION
+ ↓
+RELEASE CANDIDATE
+ ↓
+VERSIONED RELEASE
+ ↓
+OBSERVATION
+ ↓
+ITERATION
+```
 
 ## Engineering journey
 
@@ -97,7 +190,7 @@ SECURITY
 Authentication → Identity → Authorization
         ↓
 INTELLIGENCE
-AI Provider → Reasoning → Orchestration
+AI Providers → Reasoning → Orchestration
         ↓
 KNOWLEDGE
 RAG → Ingestion → Retrieval → Provenance
@@ -114,21 +207,21 @@ Tools → Workflows → Planning → Controlled Agents
 TRUST
 Evaluation → Safety → Auditing → GraveyChain
         ↓
+RESILIENCE
+Federation → Discovery → Replication → Recovery
+        ↓
 SCALE
-Docker → CI/CD → Observability → Distributed Infrastructure
+Containers → CI/CD → Observability → Distributed Infrastructure
         ↓
 ADVANCED SYSTEMS
-Multilingual Intelligence → Quantum-ready Security → Global Platform
+Multilingual Intelligence → Post-quantum Readiness → Global Platform
 ```
 
-## Current milestone
+## Current implementation status
 
-**Phase 8 — Provenance-aware RAG foundation.** GraveyAI can ingest documents through the RAG pipeline, preserve SHA3-256 provenance metadata associated with GraveyChain, and expose authenticated retrieval endpoints. The current retriever is intentionally dependency-light so production semantic retrieval can be introduced without changing the public API contract.
+The repository contains foundational authentication, provider abstraction, voice, and provenance-aware RAG work. The current RAG implementation is intentionally dependency-light while production semantic retrieval infrastructure is developed behind stable contracts.
 
-### Phase 8 endpoints
-
-- `POST /api/v1/rag/documents` — authenticated document ingestion.
-- `POST /api/v1/rag/search` — authenticated knowledge retrieval.
+Future capabilities are not represented as implemented merely because they appear in the roadmap.
 
 ## Technology direction
 
@@ -136,11 +229,12 @@ Multilingual Intelligence → Quantum-ready Security → Global Platform
 - **Backend:** Python + FastAPI
 - **Database:** PostgreSQL
 - **Vector search:** pgvector
-- **AI:** provider-agnostic interface + model adapters
+- **AI:** provider-agnostic interfaces + model adapters
 - **Voice:** provider-agnostic STT/TTS interfaces
 - **Infrastructure:** Docker
 - **Testing:** Pytest + API tests
 - **CI:** GitHub Actions
+- **Distributed systems:** federation, service discovery, replication and resilient routing
 
 ## Repository structure
 
@@ -156,13 +250,13 @@ graveyai/
 │   │   ├── rag/             # Knowledge ingestion/retrieval/provenance
 │   │   └── voice/           # STT/TTS abstraction and orchestration
 │   └── tests/               # Automated verification
-├── docs/                    # Architecture and engineering decisions
+├── docs/                    # Architecture, resilience and engineering decisions
 ├── frontend/                # Client applications
 └── docker-compose.yml       # Local infrastructure
 ```
 
 ## Definition of done
 
-A GraveyAI capability is not considered complete merely because its happy path works. A mature capability should have a clear contract, validation, authentication/authorization where required, deterministic tests, failure handling, configuration boundaries, observability hooks, and a migration path from development to production infrastructure.
+A GraveyAI capability is complete only when its contract, implementation, validation, security boundary, failure behavior, configuration boundary, tests, documentation, and production migration path are understood and appropriately verified.
 
 **GraveyAI is being built as a system first and a feature set second.**
