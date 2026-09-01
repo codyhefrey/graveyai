@@ -11,15 +11,6 @@ permissions:
   security-events: write
 
 jobs:
-  dependency-audit:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Dependency review
-        if: ${{ github.event_name == 'pull_request' }}
-        uses: actions/dependency-review-action@v4
-
   codeql:
     runs-on: ubuntu-latest
     steps:
@@ -31,3 +22,10 @@ jobs:
           languages: python
       - name: Analyze
         uses: github/codeql-action/analyze@v3
+
+  dependency-review:
+    if: ${{ false }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dependency review placeholder
+        run: echo 'Enable GitHub Dependency graph before activating dependency-review-action.'
