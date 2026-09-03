@@ -1,6 +1,7 @@
 from fastapi import HTTPException, status
 
 from app.auth.provider import Identity, IdentityProvider
+from app.auth.security import constant_time_equal
 
 
 class MockIdentityProvider(IdentityProvider):
@@ -10,7 +11,7 @@ class MockIdentityProvider(IdentityProvider):
         self.expected_token = expected_token
 
     async def verify(self, token: str) -> Identity:
-        if not self.expected_token or token != self.expected_token:
+        if not self.expected_token or not constant_time_equal(token, self.expected_token):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid authentication token",
