@@ -11,8 +11,8 @@ export default function Home() {
         <h1>Knowledge you can<br /><span>verify.</span></h1>
         <p className="lead">GraveyAI combines conversational intelligence, retrieval-augmented knowledge, and cryptographic provenance through GraveyChain.</p>
         <div className="actions">
-          <button className="primary">Start a conversation</button>
-          <button className="secondary">Explore knowledge</button>
+          <button type="button" className="primary">Start a conversation</button>
+          <button type="button" className="secondary">Explore knowledge</button>
         </div>
       </section>
 
@@ -22,7 +22,7 @@ export default function Home() {
         <article><strong>03</strong><h2>Verify</h2><p>Use cryptographic fingerprints and GraveyChain provenance to track knowledge integrity.</p></article>
       </section>
 
-      <footer>GraveyAI · Phase 5 · Built for trustworthy AI</footer>
+      <footer>GraveyAI · Phase 11 · Memory, knowledge, provenance &amp; trusted intelligence</footer>
     </main>
   );
 }
