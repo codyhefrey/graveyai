@@ -85,3 +85,18 @@ jobs:
 
       - name: Build frontend
         run: npm run build
+
+  docker-validation:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Prepare local environment
+        run: cp .env.example .env
+
+      - name: Validate Compose configuration
+        run: docker compose config --quiet
+
+      - name: Build backend image
+        run: docker build -f backend/Dockerfile backend
