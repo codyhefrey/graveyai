@@ -57,9 +57,9 @@ async def chat(
 @router.post("/rag/documents", response_model=RAGDocumentResponse, tags=["rag"])
 async def add_rag_document(
     request: RAGDocumentRequest,
-    _: Identity = Depends(require_identity),
+    identity: Identity = Depends(require_identity),
 ) -> RAGDocumentResponse:
-    chunks, provenance = _rag.ingest(request.document_id, request.text)
+    chunks, provenance = _rag.ingest(identity.subject, request.document_id, request.text)
     return RAGDocumentResponse(
         document_id=request.document_id,
         chunks=len(chunks),
@@ -73,9 +73,9 @@ async def add_rag_document(
 @router.post("/rag/search", response_model=RAGSearchResponse, tags=["rag"])
 async def search_rag(
     request: RAGSearchRequest,
-    _: Identity = Depends(require_identity),
+    identity: Identity = Depends(require_identity),
 ) -> RAGSearchResponse:
-    results = _rag.search(request.query, request.top_k)
+    results = _rag.search(identity.subject, request.query, request.top_k)
     return RAGSearchResponse(results=[RAGResult(
         document_id=r.chunk.document_id,
         chunk_id=r.chunk.chunk_id,
