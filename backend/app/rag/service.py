@@ -5,23 +5,29 @@ from app.rag.pipeline import RAGPipeline
 
 
 class RAGService:
-    """Development retrieval service built on the existing provenance-aware pipeline."""
+    """Development retrieval service with tenant-scoped in-memory state."""
 
     def __init__(self) -> None:
         self.pipeline = RAGPipeline()
-        self._chunks: list[DocumentChunk] = []
+        self._chunks_by_owner: dict[str, list[DocumentChunk]] = {}
 
-    def ingest(self, document_id: str, text: str) -> tuple[list[DocumentChunk], object]:
+    def ingest(
+        self, owner_id: str, document_id: str, text: str
+    ) -> tuple[list[DocumentChunk], object]:
+        if not owner_id.strip():
+            raise ValueError("owner_id is required")
         chunks, provenance = self.pipeline.ingest(document_id, text)
-        self._chunks.extend(chunks)
+        self._chunks_by_owner.setdefault(owner_id, []).extend(chunks)
         return chunks, provenance
 
-    def search(self, query: str, top_k: int = 5) -> list[RetrievalResult]:
+    def search(self, owner_id: str, query: str, top_k: int = 5) -> list[RetrievalResult]:
+        if not owner_id.strip():
+            raise ValueError("owner_id is required")
         terms = _terms(query)
         if not terms:
             return []
         results: list[RetrievalResult] = []
-        for chunk in self._chunks:
+        for chunk in self._chunks_by_owner.get(owner_id, []):
             chunk_terms = _terms(chunk.text)
             overlap = len(terms & chunk_terms)
             if overlap:
