@@ -52,6 +52,8 @@ class PostgresMemoryRepository(PersistentMemoryRepository):
             source = EXCLUDED.source,
             expires_at = EXCLUDED.expires_at,
             metadata = EXCLUDED.metadata
+        WHERE memory_items.owner_id = EXCLUDED.owner_id
+        RETURNING memory_id
         """
         with self.connection.cursor() as cursor:
             cursor.execute(
@@ -61,6 +63,10 @@ class PostgresMemoryRepository(PersistentMemoryRepository):
                     item.source, item.created_at, item.expires_at, Jsonb(item.metadata),
                 ),
             )
+            row = cursor.fetchone()
+            if row is None:
+                self.connection.rollback()
+                raise PermissionError("memory item belongs to another owner")
         self.connection.commit()
         return item
 
