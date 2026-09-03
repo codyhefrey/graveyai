@@ -6,7 +6,7 @@ services:
     env_file:
       - .env
     environment:
-      DATABASE_URL: ${DATABASE_URL:-postgresql+psycopg://graveyai:${POSTGRES_PASSWORD:-change-me}@db:5432/graveyai}
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-graveyai}:${POSTGRES_PASSWORD:-change-me}@db:5432/${POSTGRES_DB:-graveyai}
     depends_on:
       db:
         condition: service_healthy
