@@ -9,7 +9,8 @@ from app.api.v1.schemas import (
     RAGResult, RAGSearchRequest, RAGSearchResponse, VoiceResponse,
     VoiceTranscriptionResponse,
 )
-from app.auth.dependencies import require_bearer_token
+from app.auth.dependencies import require_identity
+from app.auth.provider import Identity
 from app.core.config import Settings, get_settings
 from app.rag.service import RAGService
 from app.voice.base import STTProvider, TTSProvider
@@ -43,13 +44,21 @@ def get_tts_provider(settings: Settings = Depends(get_settings)) -> TTSProvider:
 
 
 @router.post("/chat", response_model=ChatResponse, tags=["chat"])
-async def chat(request: ChatRequest, provider: AIProvider = Depends(get_ai_provider), settings: Settings = Depends(get_settings)) -> ChatResponse:
+async def chat(
+    request: ChatRequest,
+    _: Identity = Depends(require_identity),
+    provider: AIProvider = Depends(get_ai_provider),
+    settings: Settings = Depends(get_settings),
+) -> ChatResponse:
     response = await provider.generate(request.message)
     return ChatResponse(response=response, provider=settings.ai_provider, model=settings.ai_model)
 
 
 @router.post("/rag/documents", response_model=RAGDocumentResponse, tags=["rag"])
-async def add_rag_document(request: RAGDocumentRequest, _: str = Depends(require_bearer_token)) -> RAGDocumentResponse:
+async def add_rag_document(
+    request: RAGDocumentRequest,
+    _: Identity = Depends(require_identity),
+) -> RAGDocumentResponse:
     chunks, provenance = _rag.ingest(request.document_id, request.text)
     return RAGDocumentResponse(
         document_id=request.document_id,
@@ -62,7 +71,10 @@ async def add_rag_document(request: RAGDocumentRequest, _: str = Depends(require
 
 
 @router.post("/rag/search", response_model=RAGSearchResponse, tags=["rag"])
-async def search_rag(request: RAGSearchRequest, _: str = Depends(require_bearer_token)) -> RAGSearchResponse:
+async def search_rag(
+    request: RAGSearchRequest,
+    _: Identity = Depends(require_identity),
+) -> RAGSearchResponse:
     results = _rag.search(request.query, request.top_k)
     return RAGSearchResponse(results=[RAGResult(
         document_id=r.chunk.document_id,
@@ -73,8 +85,13 @@ async def search_rag(request: RAGSearchRequest, _: str = Depends(require_bearer_
     ) for r in results])
 
 
-@router.post("/voice/transcribe", response_model=VoiceTranscriptionResponse, tags=["voice"])
-async def transcribe_voice(audio: UploadFile, _: str = Depends(require_bearer_token), provider: STTProvider = Depends(get_stt_provider), settings: Settings = Depends(get_settings)) -> VoiceTranscriptionResponse:
+@router.post("/voice/transcribe", response_model=VoiceTranscriptionResponse)
+async def transcribe_voice(
+    audio: UploadFile,
+    _: Identity = Depends(require_identity),
+    provider: STTProvider = Depends(get_stt_provider),
+    settings: Settings = Depends(get_settings),
+) -> VoiceTranscriptionResponse:
     data = await audio.read(settings.voice_max_audio_bytes + 1)
     if len(data) > settings.voice_max_audio_bytes:
         raise HTTPException(status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE, detail="Audio file is too large")
@@ -82,12 +99,27 @@ async def transcribe_voice(audio: UploadFile, _: str = Depends(require_bearer_to
     return VoiceTranscriptionResponse(text=result.text, language=result.language, provider=result.provider)
 
 
-@router.post("/voice/respond", response_model=VoiceResponse, tags=["voice"])
-async def voice_respond(audio: UploadFile, language: str = "en", _: str = Depends(require_bearer_token), stt: STTProvider = Depends(get_stt_provider), tts: TTSProvider = Depends(get_tts_provider), ai: AIProvider = Depends(get_ai_provider), settings: Settings = Depends(get_settings)) -> VoiceResponse:
+@router.post("/voice/respond", response_model=VoiceResponse)
+async def voice_respond(
+    audio: UploadFile,
+    language: str = "en",
+    _: Identity = Depends(require_identity),
+    stt: STTProvider = Depends(get_stt_provider),
+    tts: TTSProvider = Depends(get_tts_provider),
+    ai: AIProvider = Depends(get_ai_provider),
+    settings: Settings = Depends(get_settings),
+) -> VoiceResponse:
     data = await audio.read(settings.voice_max_audio_bytes + 1)
     if len(data) > settings.voice_max_audio_bytes:
         raise HTTPException(status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE, detail="Audio file is too large")
     transcription = await stt.transcribe(data, audio.filename or "voice-input", audio.content_type)
     ai_response = await ai.generate(transcription.text)
     await tts.synthesize(ai_response, language=language)
-    return VoiceResponse(text=ai_response, language=language, stt_provider=transcription.provider, ai_provider=settings.ai_provider, ai_model=settings.ai_model, tts_provider=settings.voice_tts_provider)
+    return VoiceResponse(
+        text=ai_response,
+        language=language,
+        stt_provider=transcription.provider,
+        ai_provider=settings.ai_provider,
+        ai_model=settings.ai_model,
+        tts_provider=settings.voice_tts_provider,
+    )
