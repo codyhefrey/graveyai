@@ -5,7 +5,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     app_name: str = "GraveyAI API"
-    app_version: str = "0.11.0"
+    app_version: str = "0.7.0"
     environment: str = "development"
     api_v1_prefix: str = "/api/v1"
     database_url: str = "postgresql+psycopg://graveyai:change-me@localhost:5432/graveyai"
