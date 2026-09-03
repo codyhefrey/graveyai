@@ -2,22 +2,30 @@ services:
   api:
     build: ./backend
     ports:
-      - "8000:8000"
+      - "127.0.0.1:8000:8000"
     env_file:
       - .env
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-postgresql+psycopg://graveyai:${POSTGRES_PASSWORD:-change-me}@db:5432/graveyai}
     depends_on:
-      - db
+      db:
+        condition: service_healthy
 
   db:
     image: pgvector/pgvector:pg16
     environment:
-      POSTGRES_DB: graveyai
-      POSTGRES_USER: graveyai
-      POSTGRES_PASSWORD: graveyai
+      POSTGRES_DB: ${POSTGRES_DB:-graveyai}
+      POSTGRES_USER: ${POSTGRES_USER:-graveyai}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-me}
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
 volumes:
   postgres-data:
