@@ -32,6 +32,16 @@ def test_postgres_memory_crud_and_owner_isolation() -> None:
         assert repository.get(item.memory_id, "integration-user-1") == item
         assert repository.get(item.memory_id, "integration-user-2") is None
         assert repository.list("integration-user-1", MemoryScope.RESEARCH) == [item]
+        with pytest.raises(PermissionError):
+            repository.save(
+                MemoryItem(
+                    owner_id="integration-user-2",
+                    memory_id=item.memory_id,
+                    content="unauthorized overwrite",
+                    scope=MemoryScope.RESEARCH,
+                )
+            )
+        assert repository.get(item.memory_id, "integration-user-1") == item
         assert repository.delete(item.memory_id, "integration-user-2") is False
         assert repository.delete(item.memory_id, "integration-user-1") is True
         assert repository.get(item.memory_id, "integration-user-1") is None
