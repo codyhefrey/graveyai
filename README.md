@@ -219,9 +219,9 @@ Multilingual Intelligence → Post-quantum Readiness → Global Platform
 
 ## Current implementation status
 
-The repository contains foundational authentication, provider abstraction, voice, and provenance-aware RAG work. The current RAG implementation is intentionally dependency-light while production semantic retrieval infrastructure is developed behind stable contracts.
+**Phase 11 is an active development branch.** The repository contains foundational authentication, provider abstraction, voice, provenance-aware RAG, and controlled memory work. Phase 11 now includes explicit memory models and retention policy, a development store, a PostgreSQL persistence adapter boundary, versioned PostgreSQL/pgvector schema migrations, and provider-neutral embedding contracts.
 
-Future capabilities are not represented as implemented merely because they appear in the roadmap.
+The current RAG and embedding implementations remain dependency-light development implementations. Production semantic retrieval, production identity verification, persistent-memory operations, and distributed deployment require their respective release gates before being declared stable.
 
 ## Technology direction
 
@@ -247,8 +247,10 @@ graveyai/
 │   │   ├── ai/              # AI provider abstraction/adapters
 │   │   ├── auth/            # Identity/authentication boundary
 │   │   ├── core/            # Configuration and application primitives
+│   │   ├── memory/          # Controlled persistent/contextual memory
 │   │   ├── rag/             # Knowledge ingestion/retrieval/provenance
 │   │   └── voice/           # STT/TTS abstraction and orchestration
+│   ├── migrations/          # Versioned database migrations
 │   └── tests/               # Automated verification
 ├── docs/                    # Architecture, resilience and engineering decisions
 ├── frontend/                # Client applications
