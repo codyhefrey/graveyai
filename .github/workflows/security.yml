@@ -6,6 +6,10 @@ on:
   schedule:
     - cron: '30 4 * * 1'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
   security-events: write
@@ -22,10 +26,3 @@ jobs:
           languages: python
       - name: Analyze
         uses: github/codeql-action/analyze@v3
-
-  dependency-review:
-    if: ${{ false }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Dependency review placeholder
-        run: echo 'Enable GitHub Dependency graph before activating dependency-review-action.'
