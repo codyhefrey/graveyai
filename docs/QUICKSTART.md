@@ -53,3 +53,7 @@ The current frontend is a presentation shell. API-backed conversation and knowle
 - Replace all local `change-me` credentials before any non-local deployment.
 - Keep API keys in environment secrets, never in source control.
 - Production identity, authorization, retention enforcement, encryption, observability, and distributed deployment remain release-gated.
+
+## Reproducibility
+
+Run the backend tests and frontend build in CI before promoting a branch into an integration or release branch.
