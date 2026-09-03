@@ -19,7 +19,7 @@ class Settings(BaseSettings):
     voice_max_audio_bytes: int = 10_000_000
 
     identity_provider: str = "mock"
-    development_identity_token: str | None = None
+    development_identity_token: str | None = "development-token"
 
     model_config = SettingsConfigDict(
         env_file=".env",
