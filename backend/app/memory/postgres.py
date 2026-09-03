@@ -1,12 +1,12 @@
-"""PostgreSQL persistence adapter for GraveyAI memory.
+"""PostgreSQL persistence adapter for GraveyAI memory."""
 
-The adapter is intentionally dependency-light. SQL is kept parameterized and
-can be wired to the application's chosen PostgreSQL driver/session layer.
-"""
-
+from typing import Any
 from uuid import UUID
 
+from psycopg.types.json import Jsonb
+
 from .models import MemoryItem, MemoryScope
+from .repository import PersistentMemoryRepository
 
 
 CREATE_MEMORY_ITEMS_SQL = """
@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS memory_items (
     memory_id UUID PRIMARY KEY,
     owner_id TEXT NOT NULL,
     content TEXT NOT NULL,
-    scope TEXT NOT NULL,
+    scope TEXT NOT NULL CHECK (scope IN ('session', 'user', 'research', 'organization')),
     source TEXT,
     created_at TIMESTAMPTZ NOT NULL,
     expires_at TIMESTAMPTZ,
@@ -29,14 +29,10 @@ CREATE INDEX IF NOT EXISTS idx_memory_expiry
 """
 
 
-class PostgresMemoryRepository:
-    """Concrete repository boundary awaiting the application's DB session.
+class PostgresMemoryRepository(PersistentMemoryRepository):
+    """Concrete repository using an existing psycopg connection."""
 
-    The constructor accepts an existing database connection/session rather than
-    creating credentials or connection pools inside the domain layer.
-    """
-
-    def __init__(self, connection) -> None:
+    def __init__(self, connection: Any) -> None:
         if connection is None:
             raise ValueError("connection is required")
         self.connection = connection
@@ -62,7 +58,7 @@ class PostgresMemoryRepository:
                 sql,
                 (
                     str(item.memory_id), item.owner_id, item.content, item.scope.value,
-                    item.source, item.created_at, item.expires_at, item.metadata,
+                    item.source, item.created_at, item.expires_at, Jsonb(item.metadata),
                 ),
             )
         self.connection.commit()
@@ -78,7 +74,8 @@ class PostgresMemoryRepository:
         self.connection.commit()
         return deleted
 
-    def _row_to_item(self, row) -> MemoryItem:
+    @staticmethod
+    def _row_to_item(row: tuple[Any, ...]) -> MemoryItem:
         return MemoryItem(
             memory_id=row[0], owner_id=row[1], content=row[2],
             scope=MemoryScope(row[3]), source=row[4], created_at=row[5],
@@ -104,7 +101,7 @@ class PostgresMemoryRepository:
         WHERE owner_id = %s
           AND (expires_at IS NULL OR expires_at > CURRENT_TIMESTAMP)
         """
-        params: tuple = (owner_id,)
+        params: tuple[Any, ...] = (owner_id,)
         if scope is not None:
             sql += " AND scope = %s"
             params = (owner_id, scope.value)
