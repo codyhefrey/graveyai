@@ -11,8 +11,17 @@ def test_health() -> None:
     assert response.json()["status"] == "ok"
 
 
-def test_chat() -> None:
+def test_chat_requires_authentication() -> None:
     response = client.post("/api/v1/chat", json={"message": "Hello GraveyAI"})
+    assert response.status_code == 401
+
+
+def test_chat_with_development_identity() -> None:
+    response = client.post(
+        "/api/v1/chat",
+        headers={"Authorization": "Bearer development-token"},
+        json={"message": "Hello GraveyAI"},
+    )
     assert response.status_code == 200
     body = response.json()
     assert body["provider"] == "mock"
