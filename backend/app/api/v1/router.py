@@ -30,6 +30,11 @@ _memory_policy = MemoryPolicy()
 
 def get_ai_provider(settings: Settings = Depends(get_settings)) -> AIProvider:
     if settings.ai_provider == "mock":
+        if settings.environment != "development":
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Mock AI provider is development-only",
+            )
         return MockAIProvider()
     if settings.ai_provider == "openai":
         if not settings.openai_api_key:
@@ -40,12 +45,22 @@ def get_ai_provider(settings: Settings = Depends(get_settings)) -> AIProvider:
 
 def get_stt_provider(settings: Settings = Depends(get_settings)) -> STTProvider:
     if settings.voice_stt_provider == "mock":
+        if settings.environment != "development":
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Mock STT provider is development-only",
+            )
         return MockSTTProvider()
     raise HTTPException(status_code=500, detail=f"Unsupported STT provider: {settings.voice_stt_provider}")
 
 
 def get_tts_provider(settings: Settings = Depends(get_settings)) -> TTSProvider:
     if settings.voice_tts_provider == "mock":
+        if settings.environment != "development":
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Mock TTS provider is development-only",
+            )
         return MockTTSProvider()
     raise HTTPException(status_code=500, detail=f"Unsupported TTS provider: {settings.voice_tts_provider}")
 
