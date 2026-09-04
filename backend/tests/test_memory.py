@@ -1,4 +1,7 @@
 from datetime import datetime, timedelta, timezone
+from uuid import uuid4
+
+import pytest
 
 from app.memory.models import MemoryItem, MemoryScope
 from app.memory.policy import MemoryPolicy
@@ -26,6 +29,17 @@ def test_store_isolates_memory_by_owner():
 
     assert store.get(item.memory_id, "user-1") == item
     assert store.get(item.memory_id, "user-2") is None
+
+
+def test_store_rejects_cross_owner_overwrite():
+    store = InMemoryMemoryStore()
+    memory_id = uuid4()
+    store.save(MemoryItem(owner_id="user-1", memory_id=memory_id, content="private", scope=MemoryScope.USER))
+
+    with pytest.raises(PermissionError):
+        store.save(MemoryItem(owner_id="user-2", memory_id=memory_id, content="attack", scope=MemoryScope.USER))
+
+    assert store.get(memory_id, "user-1").content == "private"
 
 
 def test_expired_memory_is_not_readable():
