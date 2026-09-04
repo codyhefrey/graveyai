@@ -9,7 +9,7 @@ cp .env.example .env
 docker compose up --build
 ```
 
-The API is bound to `127.0.0.1:8000` and PostgreSQL to `127.0.0.1:5432`. Compose waits for PostgreSQL health before starting the API and exposes an API healthcheck.
+Compose starts PostgreSQL, waits for its health check, applies all SQL migrations, and only then starts the API. The API is bound to `127.0.0.1:8000` and PostgreSQL to `127.0.0.1:5432`.
 
 Verify the API:
 
@@ -27,11 +27,35 @@ curl \
   http://127.0.0.1:8000/api/v1/chat
 ```
 
+## Memory API
+
+Memory is authenticated and owner-scoped. The current API uses the deterministic in-memory store for development; PostgreSQL persistence is available as a repository adapter and is not silently substituted for the development store.
+
+Create memory:
+
+```bash
+curl \
+  -H 'Authorization: Bearer development-token' \
+  -H 'Content-Type: application/json' \
+  -d '{"content":"research note","scope":"research","source":"quickstart"}' \
+  http://127.0.0.1:8000/api/v1/memory
+```
+
+List memory:
+
+```bash
+curl -H 'Authorization: Bearer development-token' \
+  http://127.0.0.1:8000/api/v1/memory
+```
+
+Individual memory items can be retrieved with `GET /api/v1/memory/{memory_id}` and deleted with `DELETE /api/v1/memory/{memory_id}`. Retention is assigned by the memory policy and expired items are not returned.
+
 ## Backend tests
 
 ```bash
 cd backend
 python -m pip install -r requirements.txt
+python scripts/migrate.py
 python -m pytest -q
 ```
 
@@ -45,7 +69,7 @@ npm install
 npm run dev
 ```
 
-The current frontend is a presentation shell. API-backed conversation and knowledge controls remain a later integration milestone.
+The current frontend is a presentation shell. API-backed conversation, memory, and knowledge controls remain a later integration milestone.
 
 ## Security notes
 
@@ -56,4 +80,4 @@ The current frontend is a presentation shell. API-backed conversation and knowle
 
 ## Reproducibility
 
-Run the backend tests and frontend build in CI before promoting a branch into an integration or release branch.
+Run migration validation, backend tests, frontend build, Compose validation, and security scanning in CI before promoting a branch into an integration or release branch.
