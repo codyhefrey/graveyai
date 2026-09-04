@@ -6,18 +6,22 @@ from pathlib import Path
 import psycopg
 
 
-DATABASE_URL = os.environ.get("DATABASE_URL")
 MIGRATIONS_DIR = Path(__file__).resolve().parents[1] / "migrations"
 
 
 def main() -> None:
-    if not DATABASE_URL:
+    database_url = os.environ.get("DATABASE_URL")
+    if not database_url:
         raise RuntimeError("DATABASE_URL is required")
+    # SQLAlchemy URLs are accepted by application configuration, while psycopg
+    # expects the underlying PostgreSQL URL scheme.
+    database_url = database_url.replace("postgresql+psycopg://", "postgresql://", 1)
+
     migrations = sorted(MIGRATIONS_DIR.glob("*.sql"))
     if not migrations:
         raise RuntimeError("No SQL migrations found")
 
-    with psycopg.connect(DATABASE_URL) as connection:
+    with psycopg.connect(database_url) as connection:
         for migration in migrations:
             connection.execute(migration.read_text(encoding="utf-8"))
         connection.commit()
