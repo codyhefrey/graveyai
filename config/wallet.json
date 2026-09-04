@@ -1,0 +1,16 @@
+{
+  "mode": "non-custodial",
+  "treasury_address": "0x2D1889afB908Ea14D061CF14E91B319c6aE17eC9",
+  "address_type": "evm",
+  "payment_asset": null,
+  "default_chain_id": null,
+  "allowed_chain_ids": [],
+  "verification": {
+    "standard": "ERC-4361",
+    "signature_scheme": "ERC-191",
+    "nonce_required": true,
+    "domain_binding_required": true,
+    "private_keys_ever_requested": false
+  },
+  "status": "configured-public-address-only"
+}
