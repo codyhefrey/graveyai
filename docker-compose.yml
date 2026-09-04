@@ -1,23 +1,48 @@
 services:
-  api:
-    build: ./backend
-    ports:
-      - "8000:8000"
-    env_file:
-      - .env
-    depends_on:
-      - db
-
   db:
     image: pgvector/pgvector:pg16
     environment:
-      POSTGRES_DB: graveyai
-      POSTGRES_USER: graveyai
-      POSTGRES_PASSWORD: graveyai
+      POSTGRES_DB: ${POSTGRES_DB:-graveyai}
+      POSTGRES_USER: ${POSTGRES_USER:-graveyai}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-me}
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  migrate:
+    build: ./backend
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-graveyai}:${POSTGRES_PASSWORD:-change-me}@db:5432/${POSTGRES_DB:-graveyai}
+    depends_on:
+      db:
+        condition: service_healthy
+    command: ["python", "scripts/migrate.py"]
+    restart: "no"
+
+  api:
+    build: ./backend
+    ports:
+      - "127.0.0.1:8000:8000"
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-graveyai}:${POSTGRES_PASSWORD:-change-me}@db:5432/${POSTGRES_DB:-graveyai}
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 volumes:
   postgres-data:

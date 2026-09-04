@@ -1,3 +1,6 @@
+from datetime import datetime
+from uuid import UUID
+
 from pydantic import BaseModel, Field
 
 
@@ -55,6 +58,27 @@ class RAGResult(BaseModel):
 
 class RAGSearchResponse(BaseModel):
     results: list[RAGResult]
+
+
+class MemoryCreateRequest(BaseModel):
+    content: str = Field(min_length=1, max_length=100000)
+    scope: str = Field(min_length=1, max_length=32)
+    source: str | None = Field(default=None, max_length=500)
+    metadata: dict[str, str] = Field(default_factory=dict)
+
+
+class MemoryResponse(BaseModel):
+    memory_id: UUID
+    content: str
+    scope: str
+    source: str | None
+    created_at: datetime
+    expires_at: datetime | None
+    metadata: dict[str, str]
+
+
+class MemoryListResponse(BaseModel):
+    items: list[MemoryResponse]
 
 
 class HealthResponse(BaseModel):
