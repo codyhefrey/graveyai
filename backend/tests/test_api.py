@@ -1,5 +1,8 @@
+from fastapi import HTTPException
 from fastapi.testclient import TestClient
 
+from app.api.v1.router import get_ai_provider, get_stt_provider, get_tts_provider
+from app.core.config import Settings
 from app.main import app
 
 client = TestClient(app)
@@ -68,3 +71,29 @@ def test_memory_rejects_unsupported_scope() -> None:
         json={"content": "test", "scope": "unknown"},
     )
     assert response.status_code == 422
+
+
+def test_mock_providers_fail_closed_outside_development() -> None:
+    settings = Settings(environment="production", ai_provider="mock")
+    try:
+        get_ai_provider(settings)
+    except HTTPException as exc:
+        assert exc.status_code == 503
+    else:
+        raise AssertionError("mock AI provider must be rejected outside development")
+
+    voice_settings = Settings(environment="production", voice_stt_provider="mock")
+    try:
+        get_stt_provider(voice_settings)
+    except HTTPException as exc:
+        assert exc.status_code == 503
+    else:
+        raise AssertionError("mock STT provider must be rejected outside development")
+
+    tts_settings = Settings(environment="production", voice_tts_provider="mock")
+    try:
+        get_tts_provider(tts_settings)
+    except HTTPException as exc:
+        assert exc.status_code == 503
+    else:
+        raise AssertionError("mock TTS provider must be rejected outside development")
