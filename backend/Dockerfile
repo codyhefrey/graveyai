@@ -11,6 +11,8 @@ RUN python -m pip install --no-cache-dir --upgrade pip \
     && useradd --create-home --shell /usr/sbin/nologin graveyai
 
 COPY app ./app
+COPY migrations ./migrations
+COPY scripts ./scripts
 COPY tests ./tests
 
 RUN chown -R graveyai:graveyai /app
