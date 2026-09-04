@@ -1,7 +1,7 @@
 """Minimal ERC-4361/SIWE challenge and signature verification primitives."""
 
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 import secrets
 
 from eth_account import Account
@@ -41,10 +41,9 @@ def create_challenge(*, domain: str, uri: str, chain_id: int, address: str, ttl_
         chain_id=chain_id,
         address=address,
         issued_at=now,
-        expiration_time=now.replace(microsecond=0) + __import__('datetime').timedelta(seconds=ttl_seconds),
+        expiration_time=now.replace(microsecond=0) + timedelta(seconds=ttl_seconds),
     )
 
 
 def recover_address(message: str, signature: str) -> str:
-    recovered = Account.recover_message(encode_defunct(text=message), signature=signature)
-    return recovered
+    return Account.recover_message(encode_defunct(text=message), signature=signature)
