@@ -23,6 +23,9 @@ class InMemoryMemoryStore:
         self._items: dict[UUID, MemoryItem] = {}
 
     def save(self, item: MemoryItem) -> MemoryItem:
+        existing = self._items.get(item.memory_id)
+        if existing is not None and existing.owner_id != item.owner_id:
+            raise PermissionError("memory item belongs to another owner")
         self._items[item.memory_id] = item
         return item
 
