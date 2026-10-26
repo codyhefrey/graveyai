@@ -41,7 +41,7 @@ def create_challenge(*, domain: str, uri: str, chain_id: int, address: str, ttl_
         chain_id=chain_id,
         address=address,
         issued_at=now,
-        expiration_time=now.replace(microsecond=0) + timedelta(seconds=ttl_seconds),
+        expiration_time=now + timedelta(seconds=ttl_seconds),
     )
 
 
