@@ -8,4 +8,7 @@ client = TestClient(app)
 def test_health() -> None:
     response = client.get("/health")
     assert response.status_code == 200
-    assert response.json() == {"status": "ok", "service": "graveyai-api"}
+    data = response.json()
+    assert data["status"] == "ok"
+    assert data["service"] == "graveyai-api"
+    assert isinstance(data["version"], str) and data["version"]
