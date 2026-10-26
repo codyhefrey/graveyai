@@ -260,3 +260,9 @@ graveyai/
 A GraveyAI capability is complete only when its contract, implementation, validation, security boundary, failure behavior, configuration boundary, tests, documentation, and production migration path are understood and appropriately verified.
 
 **GraveyAI is being built as a system first and a feature set second.**
+
+## Working local-only development chat
+
+Start the existing Python API from `backend/` with `python -m pip install -r requirements.txt && python -m uvicorn app.main:app --host 127.0.0.1 --port 8000`. In a separate shell run `cd frontend && npm install && npm run dev`. Open the local Next.js development URL, choose **Start a conversation**, and send a test message. The Next.js `/api/chat` route forwards it to `GRAVEYAI_BACKEND_URL` (default `http://127.0.0.1:8000`). The default `ai_provider=mock` simply returns a deterministic development response; it is **not an AI model**. The **Explore knowledge** view searches three static educational cards, not a persistent RAG index. No conversations are saved.
+
+In production the demo proxy fails closed unless `GRAVEYAI_DEMO_ENABLED=true`; do not enable that publicly without authentication, usage limits, rate limiting, and privacy review. Neither a production AI provider nor durable knowledge storage is configured by this UI.
