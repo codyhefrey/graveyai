@@ -4,7 +4,7 @@ export const runtime = "nodejs";
 
 // Production is fail-closed: the demo endpoint cannot be exposed by accident.
 export async function POST(request: Request) {
-  if (process.env.NODE_ENV === "production" && process.env.GRAVEYAI_DEMO_ENABLED !== "true") {
+  if (process.env.NODE_ENV === "production") {
     return NextResponse.json({ error: "Demo chat is disabled in production." }, { status: 503 });
   }
 

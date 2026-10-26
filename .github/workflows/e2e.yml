@@ -1,0 +1,32 @@
+name: Full-stack local HTTP smoke
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  http-integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 14
+    env:
+      AI_PROVIDER: mock
+      NEXT_TELEMETRY_DISABLED: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install local backend and frontend
+        run: |
+          python -m pip install -r backend/requirements.txt
+          npm --prefix frontend install --no-audit --no-fund
+      - name: Build Next.js for fail-closed production check
+        run: npm --prefix frontend run build
+      - name: Real HTTP integration with local mock only
+        run: bash scripts/fullstack_e2e.sh

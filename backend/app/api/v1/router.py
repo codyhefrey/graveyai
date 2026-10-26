@@ -24,6 +24,8 @@ def get_ai_provider(settings: Settings = Depends(get_settings)) -> AIProvider:
     if settings.ai_provider == "mock":
         return MockAIProvider()
     if settings.ai_provider == "openai":
+        if settings.environment != "development":
+            raise HTTPException(status_code=503, detail="Live AI requires verified authentication, rate limits and explicit launch approval.")
         if not settings.openai_api_key:
             raise HTTPException(status_code=503, detail="OpenAI provider is enabled but OPENAI_API_KEY is not configured.")
         return OpenAIProvider(api_key=settings.openai_api_key, model=settings.ai_model)
